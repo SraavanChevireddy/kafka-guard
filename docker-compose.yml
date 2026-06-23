@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: kafkaguard
+      POSTGRES_USER: kafkaguard
+      POSTGRES_PASSWORD: kafkaguard
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kafkaguard"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  kafka-guard:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/kafkaguard
+      DB_USERNAME: kafkaguard
+      DB_PASSWORD: kafkaguard
+    ports:
+      - "8090:8090"
